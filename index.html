@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title></title>
+	<title>Eco Panels App</title>
 	<meta charset="utf-8">
 	<meta name="author" content="Paul-Andrei Burghelea">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -19,6 +19,14 @@
 			height: 100%;
 			width: 100%;
 			overflow: hidden;
+		}
+
+		#container-secondary {
+			position: relative;
+			height: 400px;
+			width: 100%;
+			overflow: hidden;
+			filter: invert(0.80);
 		}
 
 		canvas:focus {
@@ -68,15 +76,20 @@
 			top: 24px;
 			left: 24px;
 		}
+
+		.buttton-chevron {
+			width: 24px;
+			height: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 	</style>
 </head>
 
 <body>
-	<!-- this is the container where the three.js scene will go -->
+	<!-- Here the main rendering screen will be generated -->
 	<div id="container"></div>
-
-
-
 
 	<div class="container-dark" id="brand-panel">
 		Eco Panels
@@ -89,17 +102,36 @@
 		</span>
 		<div class="details-container">
 			<div class="details-section">
-				dsds
+				<button class="buttton-chevron">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+						<path fill-rule="evenodd"
+							d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z"
+							clip-rule="evenodd" />
+					</svg>
+				</button>
+				<div>
+					<div id="container-secondary" class=""></div>
+				</div>
+				<button class="buttton-chevron">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+						<path fill-rule="evenodd"
+							d="M16.28 11.47a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 0 1 1.06-1.06l7.5 7.5Z"
+							clip-rule="evenodd" />
+					</svg>
+				</button>
 			</div>
+			<ul class="">
+				<li class="">
 
+				</li>
+			</ul>
 		</div>
 	</div>
 
 
 	<!-- these are the required scripts for the three.js scene -->
 	<script src="./js/three.min.js"></script>
-	<script src="./js/OrbitControls.js"></script>
-	<script src="./js/RectAreaLightUniformsLib.js"></script>
+	<script src="./js/orbit-controls.js"></script>
 
 	<!-- this is your application js file -->
 	<script src="./js/app.js"></script>
