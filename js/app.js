@@ -2,10 +2,20 @@
  * @author Paul
  */
 
-let camera, controls, scene, renderer;
+let camera, controls, controls2, scene, scene2, renderer, renderer2;
 
 init();
 animate();
+
+const data = {
+  gridSize: null,
+
+
+  sizes: [],
+  thicknesses: [],
+  offsets: [],
+  heights: []
+}
 
 
 //Material used in the scene
@@ -13,13 +23,11 @@ const highlightMaterial = new THREE.MeshStandardMaterial({ color: '#FF2400', met
 const defaultMaterial = new THREE.MeshStandardMaterial({ color: '#e67e22', metalness: 0.5 })
 const wireframeMaterial = new THREE.MeshNormalMaterial({ color: 'white', wireframe: false })
 
-
+function unique(value, index, array) {
+  return array.indexOf(value) === index;
+}
 
 function init() {
-
-
-
-
 
   scene = new THREE.Scene();
   container = document.getElementById('container');
@@ -28,39 +36,42 @@ function init() {
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.shadowMap.enabled = true; // if you don't want shadows, set to false
-  renderer.setClearColor(0xeeeeee, 1); // this is the background color seen while scene is loading
   container.appendChild(renderer.domElement);
+  renderer.setClearColor(0x000000, 0)
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.5, 800000);
-  camera.position.set(4000, 4000, 4000); // starting position of the camera
+  camera.position.set(-120000, 120000, -70000); // starting position of the camera
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true; // creates a softer orbiting feel
-  controls.dampingFactor = 0.1; // determines how soft
+  controls.enableDamping = true
+  controls.dampingFactor = 0.1
   controls.screenSpacePanning = true;
   controls.maxPolarAngle = Math.PI / 2;
-  controls.maxDistance = 40000;
+  controls.maxDistance = 45000;
   controls.minDistance = 15000;
   controls.enablePan = false;
-
-
 
 
   // Scene 2
   scene2 = new THREE.Scene();
   container2 = document.getElementById('container-secondary');
 
-  renderer2 = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer2.setSize(container2.clientWidth, container2.clientHeight);
-  renderer2.shadowMap.enabled = true; // if you don't want shadows, set to false
-  renderer2.setClearColor(0x000000, 0); // this is the background color seen while scene is loading
-  container2.appendChild(renderer2.domElement);
+  renderer2 = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+  renderer2.setSize(container2.clientWidth, container2.clientHeight)
+  renderer2.shadowMap.enabled = true
+  renderer2.setClearColor(0x000000, 0)
+  container2.appendChild(renderer2.domElement)
 
   camera2 = new THREE.PerspectiveCamera(10, container2.clientWidth / container2.clientHeight, 0.5, 800000);
-  camera2.position.set(0, 15000, 0); // starting position of the camera
+  camera2.position.set(8000, 8000, 3000); // starting position of the camera
 
   controls2 = new THREE.OrbitControls(camera2, renderer2.domElement);
 
+  controls2.minPolarAngle = Math.PI / 4;    // Minimum vertical rotation
+  controls2.maxPolarAngle = Math.PI / 4;    // Maximum vertical rotation
 
 
 
@@ -81,8 +92,27 @@ function init() {
       const focus = scene.children.filter((item) => item.name === 'panel')[5].clone()
 
       focus.material = wireframeMaterial
+      scene2.add(focus)
 
-      scene2 = focus
+
+      const panels = scene.children.filter((item)=> item.name == 'panel');
+      const targets = scene.children.filter((item)=> item.name == 'target');
+
+
+      data.heights = panels.map((item)=> item.userData.height).filter(unique).sort((a, b) => a - b)
+      data.offsets = panels.map((item)=> item.userData.offset).filter(unique).sort((a, b) => a - b)
+      data.sizes = panels.map((item)=> item.userData.size).filter(unique).sort((a, b) => a - b)
+      data.thicknesses = panels.map((item)=> item.userData.thickness).filter(unique).sort((a, b) => a - b)
+
+
+      console.log(data)
+      console.log(panels)
+
+
+
+
+
+
 
     },
     function (obj) {
@@ -164,24 +194,27 @@ function init() {
     const target = grid[cell]
 
 
-
-    const rotation = JSON.parse(target.userData.rotation)
-
     console.log(target.userData.rotation)
     panel.position.copy(target.position);
     // panel.rotation.set(new THREE.Vector3(0,0,0))
     // panel.rotation.copy( target.rotation );
-    panel.rotation.x = rotation.x
+    // panel.rotation.x = rotation.x
 
+    panel.rotation.x = 1.571
+    panel.rotation.z = 1.571
     //Quick fix on the rotation on Y
-    if (rotation.y < 0) {
+    // if (rotation.y < 0) {
 
-      // panel.rotation.y = 3.14159
-      const scale = new THREE.Vector3(1, 1, 1);
-      scale.x *= -1;
-      panel.scale.multiply(scale)
-    }
-    panel.rotation.z = rotation.z
+    //   // panel.rotation.y = 3.14159
+    //   const scale = new THREE.Vector3(1, 1, 1);
+    //   scale.x *= -1;
+    //   panel.scale.multiply(scale)
+    // }
+
+
+
+
+
 
     scene.add(panel)
 
@@ -224,13 +257,49 @@ function animate() {
 
   requestAnimationFrame(animate);
 
+
+
+  let angle = 0;
+  const step = 0.006;
+  const maxTranslation = 0.6;
+  let currTranslation = 0;
+  let direction = true;
+  const variation = 0.1
+
+
+  angle += step;
+
+  if (angle >= 360) {
+    angle = 0;
+  }
+
+  scene2.rotateY(0.003)
+
+
+
+
+
+
+
+
+
+
   controls.update();
   controls2.update();
   render();
-
 }
 
 function render() {
+
   renderer.render(scene, camera);
   renderer2.render(scene2, camera2);
+}
+
+
+function genSliders() {
+
+  
+  
+
+
 }
