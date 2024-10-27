@@ -35,8 +35,11 @@ let currentPanel = 0
 
 //Material used in the scene
 const highlightMaterial = new THREE.MeshStandardMaterial({ color: '#FF2400', metalness: 0.5 })
-const defaultMaterial = new THREE.MeshStandardMaterial({ color: '#e67e22', metalness: 0.5 })
+const defaultMaterial = new THREE.MeshStandardMaterial({ color: '#818589', metalness: 0.5 })
 const wireframeMaterial = new THREE.MeshNormalMaterial({ color: 'white', wireframe: false })
+
+wireframeMaterial.polygonOffset = true;
+wireframeMaterial.polygonOffsetFactor = -0.5;
 
 init();
 animate();
@@ -58,12 +61,16 @@ function getCurrentGrid() {
   return scene.children.filter((item) => item.name === 'target' && item.userData.size == store.current.size)
 }
 
+function getCurrentPanels() {
+  return scene.children.filter((item) => item.name === 'panel' && item.userData.size == store.current.size)
+}
+
 function getAllGrids() {
   return scene.children.filter((item) => item.name === 'target')
 }
 
 function getPanels() {
-  return scene.children.filter((item) => item.name === 'panel' && item.userData.size == store.current.size)
+  return store.geometry.panels[store.current.size][0]
 }
 
 function getAllPanels() {
@@ -103,6 +110,19 @@ function init() {
 
       const panels = scene.children.filter((item) => item.name == 'panel');
       const targets = scene.children.filter((item) => item.name == 'target');
+
+
+
+      scene.children.forEach((item)=> {
+        if(item.name === 'context') {
+
+          item.material = defaultMaterial
+
+
+        }
+      })
+
+
 
 
 
@@ -311,9 +331,10 @@ function initUIEvents() {
     let mouse3D = new THREE.Vector3((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0.5);
 
 
-    let raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse3D, camera);
-    let intersects = raycaster.intersectObjects(scene.children.filter((object) => object.name === 'target'));
+    const raycaster = new THREE.Raycaster()
+    raycaster.setFromCamera(mouse3D, camera)
+
+    const intersects = raycaster.intersectObjects(scene.children.filter((object) => object.name === 'target'  || object.name === 'panel'))
 
 
     if (intersects.length > 0) {
@@ -322,11 +343,39 @@ function initUIEvents() {
         prevSelection.material = defaultMaterial
 
       const object = intersects[0].object
-      object.material = highlightMaterial
 
 
-      const index = getCurrentGrid().indexOf(object)
-      changeCell(index)
+      // object.material = highlightMaterial
+
+      
+      switch (object.name) {
+        case 'target': {
+          const index = getCurrentGrid().indexOf(object)
+          changeCell(index)
+          break;
+        }
+       
+        case 'panel': {
+          const panel = store.geometry.panels[store.current.size][0][currentPanel].clone()
+        
+          panel.position.copy(object.position);
+        
+          panel.rotation.x = 1.571
+          panel.rotation.z = 1.571
+        
+          scene.add(panel)
+        
+          scene.remove(object)
+
+          break;
+        }
+
+    
+        default:
+          break;
+      }
+
+
 
       // console.log(intersects[0].object.userData)
       // console.log(intersects[0].object)
@@ -460,10 +509,15 @@ function updateGrid() {
 
   store.geometry.grid[store.current.size][0].forEach((cell) => {
 
-    cell.scale.x = 0.5
+    cell.scale.z = 0.5
+    cell.scale.y = 0.5
 
+    cell.material = wireframeMaterial
     scene.add(cell)
+
   })
+
+  setCurrentPanel(0)
 
 }
 
