@@ -70,6 +70,10 @@ canvas:focus {
 
 #brand-panel {
     position: absolute;
+    display: flex;
+    align-items: center;
+    fill: #ff8832;
+    gap: 8px;
     top: 24px;
     left: 24px;
 }
